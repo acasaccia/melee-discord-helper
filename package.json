@@ -1,0 +1,20 @@
+{
+  "name": "melee-discord-helper",
+  "version": "1.0.0",
+  "description": "A helper bot for managing Magic: The Gathering Arena melee tournaments on Discord.",
+  "main": "melee-discord-helper.js",
+  "bin": {
+    "mdh": "./melee-discord-helper.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "mtga",
+    "tournament",
+    "magic"
+  ],
+  "author": "",
+  "license": "ISC"
+}
