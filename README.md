@@ -72,6 +72,9 @@ Edit `.env` and add your Melee.gg API credentials:
 ```
 CLIENT_ID=your_melee_client_id
 CLIENT_SECRET=your_melee_client_secret
+
+# Optional: Set a default tournament ID to avoid specifying it each time
+TOURNAMENT_ID=373107
 ```
 
 To get API credentials:
@@ -86,14 +89,16 @@ The CLI provides three main commands for tournament management:
 ### Basic syntax
 
 ```bash
-mdh <command> <tournament-id>
+mdh <command> [tournament-id]
 ```
 
 Or if not installed globally:
 
 ```bash
-node melee-discord-helper.js <command> <tournament-id>
+node melee-discord-helper.js <command> [tournament-id]
 ```
+
+**Note:** Tournament ID is optional if you set `TOURNAMENT_ID` in your `.env` file. The command line argument will override the environment variable if both are provided.
 
 ### Commands
 
@@ -102,7 +107,11 @@ node melee-discord-helper.js <command> <tournament-id>
 List all tournament participants with their deck information.
 
 ```bash
+# Using command line tournament ID
 mdh participants 373107
+
+# Using tournament ID from .env file
+mdh participants
 ```
 
 **Example output:**
@@ -121,7 +130,11 @@ mdh participants 373107
 Show current round pairings with match numbers. BYE matches are listed first.
 
 ```bash
+# Using command line tournament ID
 mdh pairings 373107
+
+# Using tournament ID from .env file
+mdh pairings
 ```
 
 **Example output:**
@@ -143,7 +156,11 @@ mdh pairings 373107
 Display current tournament standings with match records, game records, and OMW.
 
 ```bash
+# Using command line tournament ID
 mdh standings 373107
+
+# Using tournament ID from .env file
+mdh standings
 ```
 
 **Example output:**
@@ -152,13 +169,13 @@ mdh standings 373107
 :loudspeaker: **Standings After Round 9** :loudspeaker:
 
 ```
-Rank Player          Match Game  OMW   
+Rank Player          Match Game  OMW
 ---------------------------------------
-1    @yawgmoth_      8-1   17-4  63.3% 
-2    @squee311       6-2   12-7  57.1% 
-3    @tinyminer      3-2   7-5   58.7% 
-3    @morbidmind     6-3   14-11 54.6% 
-4    @fr.nwm         3-2   8-5   52.0% 
+1    @yawgmoth_      8-1   17-4  63.3%
+2    @squee311       6-2   12-7  57.1%
+3    @tinyminer      3-2   7-5   58.7%
+3    @morbidmind     6-3   14-11 54.6%
+4    @fr.nwm         3-2   8-5   52.0%
 ```
 ````
 

@@ -9,6 +9,7 @@ const { standingsCommand } = require("./commands/standings");
 // Configuration from environment variables
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
+const DEFAULT_TOURNAMENT_ID = process.env.TOURNAMENT_ID;
 
 // Main function - Command router
 async function main() {
@@ -23,12 +24,15 @@ async function main() {
 
     // Get command and tournament ID from command line arguments
     const command = process.argv[2];
-    const tournamentId = process.argv[3];
+    const tournamentId = process.argv[3] || DEFAULT_TOURNAMENT_ID;
 
     if (!command) {
       console.error("Error: Command is required as the first argument");
       console.error("Usage: node melee.js <command> [tournament-id]");
       console.error("Available commands: participants, pairings, standings");
+      console.error(
+        "Note: tournament-id can be set via TOURNAMENT_ID environment variable"
+      );
       process.exit(1);
     }
 
@@ -40,6 +44,7 @@ async function main() {
             "Error: Tournament ID is required for participants command"
           );
           console.error("Usage: node melee.js participants <tournament-id>");
+          console.error("Or set TOURNAMENT_ID in .env file");
           process.exit(1);
         }
         await participantsCommand(tournamentId);
@@ -50,6 +55,7 @@ async function main() {
             "Error: Tournament ID is required for pairings command"
           );
           console.error("Usage: node melee.js pairings <tournament-id>");
+          console.error("Or set TOURNAMENT_ID in .env file");
           process.exit(1);
         }
         await pairingsCommand(tournamentId);
@@ -60,6 +66,7 @@ async function main() {
             "Error: Tournament ID is required for standings command"
           );
           console.error("Usage: node melee.js standings <tournament-id>");
+          console.error("Or set TOURNAMENT_ID in .env file");
           process.exit(1);
         }
         await standingsCommand(tournamentId);
