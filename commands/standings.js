@@ -37,15 +37,20 @@ async function standingsCommand(tournamentId) {
     console.log(
       `:loudspeaker: **Standings ${currentRoundInfo}** :loudspeaker:\n`
     );
-    console.log("```");
-    console.log("Rank\tPlayer\t\t\tMatch\tGame\t\tOMW");
-    console.log("----\t------\t\t\t-----\t----\t\t---");
 
     // Sort standings by rank/position
     const sortedStandings = standingsResponse.Content.sort((a, b) => {
       return (a.Rank || a.Position || 999) - (b.Rank || b.Position || 999);
     });
 
+    // Prepare table data for column width calculation
+    const tableData = [];
+    const headers = ["Rank", "Player", "Match", "Game", "OMW"];
+
+    // Add header row
+    tableData.push(headers);
+
+    // Process each standing and collect data
     sortedStandings.forEach((standing, index) => {
       const position = standing.Rank || standing.Position || index + 1;
 
@@ -84,15 +89,56 @@ async function standingsCommand(tournamentId) {
 
       // Get OMW (Opponent Match Win percentage)
       const omw = standing.OpponentMatchWinPercentage || 0;
-      const omwPercentage = (omw * 100).toFixed(1);
+      const omwPercentage = `${(omw * 100).toFixed(1)}%`;
 
-      // Pad username to align columns (truncate if too long)
-      const paddedUsername = `@${discordName}`.padEnd(20).substring(0, 20);
+      // Add data row
+      tableData.push([
+        position.toString(),
+        `@${discordName}`,
+        matchRecord,
+        gameRecord,
+        omwPercentage,
+      ]);
+    });
 
-      console.log(
-        `${position}\t${paddedUsername}\t${matchRecord}\t${gameRecord}\t\t${omwPercentage}%`
+    // Calculate column widths
+    const columnWidths = headers.map((_, colIndex) => {
+      return Math.max(
+        ...tableData.map((row) => (row[colIndex] ? row[colIndex].length : 0))
       );
     });
+
+    // Add some padding to columns
+    const padding = [1, 2, 1, 1, 1]; // Extra padding per column
+    columnWidths.forEach((width, index) => {
+      columnWidths[index] = width + padding[index];
+    });
+
+    // Helper function to format a row
+    const formatRow = (rowData) => {
+      return rowData
+        .map((cell, index) => {
+          const cellStr = cell || "";
+          return cellStr.padEnd(columnWidths[index]);
+        })
+        .join("");
+    };
+
+    // Print the formatted table
+    console.log("```");
+
+    // Print headers
+    console.log(formatRow(headers));
+
+    // Print separator line
+    const separators = columnWidths.map((width) => "-".repeat(width));
+    console.log(formatRow(separators));
+
+    // Print data rows (skip header row)
+    tableData.slice(1).forEach((row) => {
+      console.log(formatRow(row));
+    });
+
     console.log("```");
   } catch (error) {
     console.error("Error:", error.message);

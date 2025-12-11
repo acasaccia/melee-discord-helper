@@ -152,13 +152,13 @@ mdh standings 373107
 :loudspeaker: **Standings After Round 9** :loudspeaker:
 
 ```
-Rank    Player                  Match   Game            OMW
-----    ------                  -----   ----            ---
-1       @yawgmoth_              8-1     17-4            63.3%
-2       @squee311               6-2     12-7            57.1%
-3       @tinyminer              3-2     7-5             58.7%
-4       @morbidmind             6-3     14-11           54.6%
-5       @fr.nwm                 3-2     8-5             52.0%
+Rank Player          Match Game  OMW   
+---------------------------------------
+1    @yawgmoth_      8-1   17-4  63.3% 
+2    @squee311       6-2   12-7  57.1% 
+3    @tinyminer      3-2   7-5   58.7% 
+3    @morbidmind     6-3   14-11 54.6% 
+4    @fr.nwm         3-2   8-5   52.0% 
 ```
 ````
 
