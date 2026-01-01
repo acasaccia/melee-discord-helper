@@ -77,24 +77,34 @@ async function pairingsCommand(tournamentId) {
       return;
     }
 
-    // Get current round info and total rounds from tournament data
+    // Get current round info and determine phase information
     const firstMatch = matchesResponse.Content[0];
     const currentRoundNumber = firstMatch?.RoundNumber || 1;
 
-    // Find the current phase and get total rounds
-    let totalRounds = "?"; // fallback
-    if (tournamentData && tournamentData.Phases) {
+    // Detect if we're in the second phase (double elimination bracket)
+    let pairingTitle = `Round ${currentRoundNumber} Pairings`;
+    if (tournamentData && tournamentData.Phases && firstMatch?.PhaseId) {
       const currentPhase = tournamentData.Phases.find(
-        (phase) => phase.ID === firstMatch?.PhaseId
+        (phase) => phase.ID === firstMatch.PhaseId
       );
-      if (currentPhase && currentPhase.Rounds) {
-        totalRounds = currentPhase.Rounds.length;
+
+      if (currentPhase) {
+        const phaseIndex = tournamentData.Phases.indexOf(currentPhase);
+        const isSecondPhase = phaseIndex === 1; // Second phase (index 1)
+
+        if (isSecondPhase) {
+          pairingTitle = `Double Elimination Bracket`;
+        } else {
+          // First phase or other phases - show round X of Y format
+          const totalRounds = currentPhase.Rounds
+            ? currentPhase.Rounds.length
+            : "?";
+          pairingTitle = `Round ${currentRoundNumber} of ${totalRounds} Pairings`;
+        }
       }
     }
 
-    console.log(
-      `:loudspeaker: **Round ${currentRoundNumber} of ${totalRounds} Pairings** :loudspeaker:\n`
-    );
+    console.log(`:loudspeaker: **${pairingTitle}** :loudspeaker:\n`);
 
     // Separate BYE matches from regular matches
     const byeMatches = [];
@@ -118,9 +128,25 @@ async function pairingsCommand(tournamentId) {
       const playerDiscord = player.DiscordUsername
         ? player.DiscordUsername.replace(/#\d+$/, "")
         : player.Username || "Unknown";
-      const playerDeck = match.Competitors[0].Decklists[0];
 
-      const playerInfo = `@${playerDiscord} ([${playerDeck.DecklistName}](https://melee.gg/Decklist/View/${playerDeck.DecklistId}))`;
+      // Get deck info from match or fallback to participant map
+      let deckInfo = null;
+      if (match.Competitors[0].Decklists && match.Competitors[0].Decklists[0]) {
+        const playerDeck = match.Competitors[0].Decklists[0];
+        deckInfo = {
+          name: playerDeck.DecklistName,
+          url: `https://melee.gg/Decklist/View/${playerDeck.DecklistId}`,
+        };
+      } else {
+        // Fallback to participant map (first phase deck info)
+        const participantInfo = participantMap.get(player.ID);
+        deckInfo = participantInfo?.deck;
+      }
+
+      const deckDisplay = deckInfo
+        ? `([${deckInfo.name}](${deckInfo.url}))`
+        : "(No deck info)";
+      const playerInfo = `@${playerDiscord} ${deckDisplay}`;
       console.log(`:white_check_mark: ${playerInfo} - BYE`);
     });
 
@@ -137,11 +163,43 @@ async function pairingsCommand(tournamentId) {
         ? player2.DiscordUsername.replace(/#\d+$/, "")
         : player2.Username || "Unknown";
 
-      const player1Deck = match.Competitors[0].Decklists[0];
-      const player2Deck = match.Competitors[1].Decklists[0];
+      // Get deck info from match or fallback to participant map
+      let player1DeckInfo = null;
+      let player2DeckInfo = null;
 
-      const player1Info = `@${player1Discord} ([${player1Deck.DecklistName}](https://melee.gg/Decklist/View/${player1Deck.DecklistId}))`;
-      const player2Info = `@${player2Discord} ([${player2Deck.DecklistName}](https://melee.gg/Decklist/View/${player2Deck.DecklistId}))`;
+      if (match.Competitors[0].Decklists && match.Competitors[0].Decklists[0]) {
+        const player1Deck = match.Competitors[0].Decklists[0];
+        player1DeckInfo = {
+          name: player1Deck.DecklistName,
+          url: `https://melee.gg/Decklist/View/${player1Deck.DecklistId}`,
+        };
+      } else {
+        // Fallback to participant map (first phase deck info)
+        const participantInfo = participantMap.get(player1.ID);
+        player1DeckInfo = participantInfo?.deck;
+      }
+
+      if (match.Competitors[1].Decklists && match.Competitors[1].Decklists[0]) {
+        const player2Deck = match.Competitors[1].Decklists[0];
+        player2DeckInfo = {
+          name: player2Deck.DecklistName,
+          url: `https://melee.gg/Decklist/View/${player2Deck.DecklistId}`,
+        };
+      } else {
+        // Fallback to participant map (first phase deck info)
+        const participantInfo = participantMap.get(player2.ID);
+        player2DeckInfo = participantInfo?.deck;
+      }
+
+      const player1DeckDisplay = player1DeckInfo
+        ? `([${player1DeckInfo.name}](${player1DeckInfo.url}))`
+        : "(No deck info)";
+      const player2DeckDisplay = player2DeckInfo
+        ? `([${player2DeckInfo.name}](${player2DeckInfo.url}))`
+        : "(No deck info)";
+
+      const player1Info = `@${player1Discord} ${player1DeckDisplay}`;
+      const player2Info = `@${player2Discord} ${player2DeckDisplay}`;
 
       console.log(
         `${getNumberEmoji(pairingIndex)} ${player1Info} vs ${player2Info}`
