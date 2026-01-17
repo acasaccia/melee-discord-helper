@@ -3,6 +3,7 @@ const {
   getParticipants,
   getTournament,
 } = require("../utils/api");
+const { printSplitMessage } = require("../utils/messageFormatter");
 
 // Helper function to get participant info by ID
 async function getParticipantInfo(tournamentId) {
@@ -56,7 +57,7 @@ function getNumberEmoji(index) {
 async function pairingsCommand(tournamentId) {
   try {
     console.log(
-      `Fetching current pairings for tournament ${tournamentId}...\n`
+      `Fetching current pairings for tournament ${tournamentId}...\n`,
     );
 
     // Get matches, participant info, and tournament data
@@ -65,7 +66,7 @@ async function pairingsCommand(tournamentId) {
         getCurrentMatches(tournamentId),
         getParticipantInfo(tournamentId),
         getTournament(tournamentId),
-      ]
+      ],
     );
 
     if (
@@ -85,7 +86,7 @@ async function pairingsCommand(tournamentId) {
     let pairingTitle = `Round ${currentRoundNumber} Pairings`;
     if (tournamentData && tournamentData.Phases && firstMatch?.PhaseId) {
       const currentPhase = tournamentData.Phases.find(
-        (phase) => phase.ID === firstMatch.PhaseId
+        (phase) => phase.ID === firstMatch.PhaseId,
       );
 
       if (currentPhase) {
@@ -104,7 +105,7 @@ async function pairingsCommand(tournamentId) {
       }
     }
 
-    console.log(`:loudspeaker: **${pairingTitle}** :loudspeaker:\n`);
+    let message = `:loudspeaker: **${pairingTitle}** :loudspeaker:\n`;
 
     // Separate BYE matches from regular matches
     const byeMatches = [];
@@ -147,7 +148,7 @@ async function pairingsCommand(tournamentId) {
         ? `([${deckInfo.name}](${deckInfo.url}))`
         : "(No deck info)";
       const playerInfo = `@${playerDiscord} ${deckDisplay}`;
-      console.log(`:white_check_mark: ${playerInfo} - BYE`);
+      message += `:white_check_mark: ${playerInfo} - BYE\n`;
     });
 
     // Display regular matches with numbering
@@ -201,11 +202,11 @@ async function pairingsCommand(tournamentId) {
       const player1Info = `@${player1Discord} ${player1DeckDisplay}`;
       const player2Info = `@${player2Discord} ${player2DeckDisplay}`;
 
-      console.log(
-        `${getNumberEmoji(pairingIndex)} ${player1Info} vs ${player2Info}`
-      );
+      message += `${getNumberEmoji(pairingIndex)} ${player1Info} vs ${player2Info}\n`;
       pairingIndex++;
     });
+
+    printSplitMessage(message);
   } catch (error) {
     console.error("Error:", error.message);
     process.exit(1);

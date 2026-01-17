@@ -1,4 +1,5 @@
 const { getParticipants } = require("../utils/api");
+const { printSplitMessage } = require("../utils/messageFormatter");
 
 // Command: participants - Get tournament participants
 async function participantsCommand(tournamentId) {
@@ -11,7 +12,7 @@ async function participantsCommand(tournamentId) {
       return;
     }
 
-    console.log(":loudspeaker: **Tournament participants:** :loudspeaker:\n");
+    let message = ":loudspeaker: **Tournament participants:** :loudspeaker:\n";
     response.Content.forEach((player) => {
       // Extract Discord username (remove the #0 suffix if present)
       const discordUsername = player.DiscordUsername
@@ -25,11 +26,13 @@ async function participantsCommand(tournamentId) {
           decklist.AdminGivenName || decklist.DecklistName || "Unknown Deck";
         const deckUrl = `https://melee.gg/Decklist/View/${decklist.Guid}`;
 
-        console.log(`- @${discordUsername} - [${deckName}](${deckUrl})`);
+        message += `- @${discordUsername} - [${deckName}](${deckUrl})\n`;
       } else {
-        console.log(`- @${discordUsername} - No decklist submitted`);
+        message += `- @${discordUsername} - No decklist submitted\n`;
       }
     });
+
+    printSplitMessage(message);
   } catch (error) {
     console.error("Error:", error.message);
     process.exit(1);

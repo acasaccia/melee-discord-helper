@@ -1,4 +1,5 @@
 const { getStandings, getTournament } = require("../utils/api");
+const { printSplitMessage } = require("../utils/messageFormatter");
 
 // Command: standings - Get current tournament standings
 async function standingsCommand(tournamentId) {
@@ -34,9 +35,7 @@ async function standingsCommand(tournamentId) {
       }
     }
 
-    console.log(
-      `:loudspeaker: **Standings ${currentRoundInfo}** :loudspeaker:\n`
-    );
+    let message = `:loudspeaker: **Standings ${currentRoundInfo}** :loudspeaker:\n`;
 
     // Sort standings by rank/position
     const sortedStandings = standingsResponse.Content.sort((a, b) => {
@@ -104,7 +103,7 @@ async function standingsCommand(tournamentId) {
     // Calculate column widths
     const columnWidths = headers.map((_, colIndex) => {
       return Math.max(
-        ...tableData.map((row) => (row[colIndex] ? row[colIndex].length : 0))
+        ...tableData.map((row) => (row[colIndex] ? row[colIndex].length : 0)),
       );
     });
 
@@ -124,22 +123,24 @@ async function standingsCommand(tournamentId) {
         .join("");
     };
 
-    // Print the formatted table
-    console.log("```");
+    // Build the formatted table as a string
+    message += "```\n";
 
-    // Print headers
-    console.log(formatRow(headers));
+    // Add headers
+    message += formatRow(headers) + "\n";
 
-    // Print separator line
+    // Add separator line
     const separators = columnWidths.map((width) => "-".repeat(width));
-    console.log(formatRow(separators));
+    message += formatRow(separators) + "\n";
 
-    // Print data rows (skip header row)
+    // Add data rows (skip header row)
     tableData.slice(1).forEach((row) => {
-      console.log(formatRow(row));
+      message += formatRow(row) + "\n";
     });
 
-    console.log("```");
+    message += "```";
+
+    printSplitMessage(message);
   } catch (error) {
     console.error("Error:", error.message);
     process.exit(1);
