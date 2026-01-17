@@ -1,5 +1,5 @@
 // Discord's maximum message length
-const DISCORD_MAX_LENGTH = 2000;
+const DISCORD_MAX_LENGTH = 1800;
 
 /**
  * Splits a message into chunks that fit within Discord's character limit.
