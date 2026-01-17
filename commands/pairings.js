@@ -36,23 +36,6 @@ async function getParticipantInfo(tournamentId) {
   return participantMap;
 }
 
-// Helper function to get number emoji
-function getNumberEmoji(index) {
-  const numberEmojis = [
-    ":one:",
-    ":two:",
-    ":three:",
-    ":four:",
-    ":five:",
-    ":six:",
-    ":seven:",
-    ":eight:",
-    ":nine:",
-    ":keycap_ten:",
-  ];
-  return numberEmojis[index] || `:${index + 1}:`;
-}
-
 // Command: pairings - Get current tournament pairings
 async function pairingsCommand(tournamentId) {
   try {
@@ -148,11 +131,10 @@ async function pairingsCommand(tournamentId) {
         ? `([${deckInfo.name}](${deckInfo.url}))`
         : "(No deck info)";
       const playerInfo = `@${playerDiscord} ${deckDisplay}`;
-      message += `:white_check_mark: ${playerInfo} - BYE\n`;
+      message += `- ${playerInfo} - BYE\n`;
     });
 
-    // Display regular matches with numbering
-    let pairingIndex = 0;
+    // Display regular matches
     regularMatches.forEach((match) => {
       const player1 = match.Competitors[0].Team.Players[0];
       const player2 = match.Competitors[1].Team.Players[0];
@@ -202,8 +184,7 @@ async function pairingsCommand(tournamentId) {
       const player1Info = `@${player1Discord} ${player1DeckDisplay}`;
       const player2Info = `@${player2Discord} ${player2DeckDisplay}`;
 
-      message += `${getNumberEmoji(pairingIndex)} ${player1Info} vs ${player2Info}\n`;
-      pairingIndex++;
+      message += `- ${player1Info} vs ${player2Info}\n`;
     });
 
     printSplitMessage(message);
