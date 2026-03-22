@@ -8,7 +8,7 @@ const CLIENT_SECRET = process.env.CLIENT_SECRET;
 function makeApiRequest(path) {
   return new Promise((resolve, reject) => {
     const credentials = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString(
-      "base64"
+      "base64",
     );
 
     const options = {
@@ -18,6 +18,7 @@ function makeApiRequest(path) {
       headers: {
         Authorization: `Basic ${credentials}`,
         Accept: "application/json",
+        "Cache-Control": "no-cache",
       },
     };
 
