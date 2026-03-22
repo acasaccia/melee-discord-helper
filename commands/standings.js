@@ -36,33 +36,23 @@ async function standingsCommand(tournamentId) {
     }
 
     let message = `:loudspeaker: **Standings ${currentRoundInfo}** :loudspeaker:\n`;
+    message += `\n`;
+    message += `(Match record, Game record, OMW%)\n`;
 
     // Sort standings by rank/position
     const sortedStandings = standingsResponse.Content.sort((a, b) => {
       return (a.Rank || a.Position || 999) - (b.Rank || b.Position || 999);
     });
 
-    // Prepare table data for column width calculation
-    const tableData = [];
-    const headers = ["Rank", "Player", "Match", "Game", "OMW"];
-
-    // Add header row
-    tableData.push(headers);
-
-    // Process each standing and collect data
+    // Process each standing
     sortedStandings.forEach((standing, index) => {
       const position = standing.Rank || standing.Position || index + 1;
 
       // Get player info from Team.Players[0]
       const player = standing.Team?.Players?.[0];
-      const playerName =
-        player?.DisplayName || player?.Username || "Unknown Player";
-
-      // Extract Discord username if available (remove #0 suffix)
-      let discordName = playerName;
-      if (player?.DiscordUsername) {
-        discordName = player.DiscordUsername.replace(/#\d+$/, "");
-      }
+      const discordHandle =
+        player?.DiscordUsername.split("#")[0] || "Unknown Player";
+      const playerName = `@${discordHandle}` || "Unknown Player";
 
       // Get match record
       const matchWins = standing.MatchWins || 0;
@@ -90,55 +80,9 @@ async function standingsCommand(tournamentId) {
       const omw = standing.OpponentMatchWinPercentage || 0;
       const omwPercentage = `${(omw * 100).toFixed(1)}%`;
 
-      // Add data row
-      tableData.push([
-        position.toString(),
-        `@${discordName}`,
-        matchRecord,
-        gameRecord,
-        omwPercentage,
-      ]);
+      // Add standing line in compact format
+      message += `${position}. ${playerName} (${matchRecord}, ${gameRecord}, ${omwPercentage})\n`;
     });
-
-    // Calculate column widths
-    const columnWidths = headers.map((_, colIndex) => {
-      return Math.max(
-        ...tableData.map((row) => (row[colIndex] ? row[colIndex].length : 0)),
-      );
-    });
-
-    // Add some padding to columns
-    const padding = [1, 2, 1, 1, 1]; // Extra padding per column
-    columnWidths.forEach((width, index) => {
-      columnWidths[index] = width + padding[index];
-    });
-
-    // Helper function to format a row
-    const formatRow = (rowData) => {
-      return rowData
-        .map((cell, index) => {
-          const cellStr = cell || "";
-          return cellStr.padEnd(columnWidths[index]);
-        })
-        .join("");
-    };
-
-    // Build the formatted table as a string
-    message += "```\n";
-
-    // Add headers
-    message += formatRow(headers) + "\n";
-
-    // Add separator line
-    const separators = columnWidths.map((width) => "-".repeat(width));
-    message += formatRow(separators) + "\n";
-
-    // Add data rows (skip header row)
-    tableData.slice(1).forEach((row) => {
-      message += formatRow(row) + "\n";
-    });
-
-    message += "```";
 
     printSplitMessage(message);
   } catch (error) {
