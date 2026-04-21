@@ -1,40 +1,9 @@
 const {
   getCurrentMatches,
-  getParticipants,
   getTournament,
+  getParticipantInfo,
 } = require("../utils/api");
 const { printSplitMessage } = require("../utils/messageFormatter");
-
-// Helper function to get participant info by ID
-async function getParticipantInfo(tournamentId) {
-  const participantsResponse = await getParticipants(tournamentId);
-  const participantMap = new Map();
-
-  if (participantsResponse && participantsResponse.Content) {
-    participantsResponse.Content.forEach((player) => {
-      const discordUsername = player.DiscordUsername
-        ? player.DiscordUsername.replace(/#\d+$/, "")
-        : player.Username || "Unknown";
-      const deckInfo =
-        player.Decklists && player.Decklists.length > 0
-          ? {
-              name:
-                player.Decklists[0].AdminGivenName ||
-                player.Decklists[0].DecklistName ||
-                "Unknown Deck",
-              url: `https://melee.gg/Decklist/View/${player.Decklists[0].Guid}`,
-            }
-          : null;
-
-      participantMap.set(player.ID, {
-        discord: discordUsername,
-        deck: deckInfo,
-      });
-    });
-  }
-
-  return participantMap;
-}
 
 // Command: pairings - Get current tournament pairings
 async function pairingsCommand(tournamentId) {

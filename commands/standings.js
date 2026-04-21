@@ -1,14 +1,20 @@
-const { getStandings, getTournament } = require("../utils/api");
+const {
+  getStandings,
+  getTournament,
+  getParticipantInfo,
+} = require("../utils/api");
 const { printSplitMessage } = require("../utils/messageFormatter");
 
 // Command: standings - Get current tournament standings
 async function standingsCommand(tournamentId) {
   try {
-    // Get standings and tournament data
-    const [standingsResponse, tournamentData] = await Promise.all([
-      getStandings(tournamentId),
-      getTournament(tournamentId),
-    ]);
+    // Get standings, tournament data, and participant info
+    const [standingsResponse, tournamentData, participantMap] =
+      await Promise.all([
+        getStandings(tournamentId),
+        getTournament(tournamentId),
+        getParticipantInfo(tournamentId),
+      ]);
 
     if (
       !standingsResponse ||
@@ -48,11 +54,14 @@ async function standingsCommand(tournamentId) {
     sortedStandings.forEach((standing, index) => {
       const position = standing.Rank || standing.Position || index + 1;
 
-      // Get player info from Team.Players[0]
-      const player = standing.Team?.Players?.[0];
-      const discordHandle =
-        player?.DiscordUsername.split("#")[0] || "Unknown Player";
-      const playerName = `@${discordHandle}` || "Unknown Player";
+      // Get player info from participant map using Player ID
+      const playerId = standing.Team?.Players?.[0]?.ID;
+      const participantInfo = playerId ? participantMap.get(playerId) : null;
+      const discordHandle = participantInfo?.discord || "Unknown Player";
+      const playerName =
+        discordHandle !== "Unknown Player"
+          ? `@${discordHandle}`
+          : discordHandle;
 
       // Get match record
       const matchWins = standing.MatchWins || 0;
