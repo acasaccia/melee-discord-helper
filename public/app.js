@@ -1,0 +1,96 @@
+let currentRequest = null;
+let originalMessage = "";
+
+async function copyToClipboard() {
+  try {
+    await navigator.clipboard.writeText(originalMessage);
+    const feedback = document.getElementById("copyFeedback");
+    feedback.classList.add("show");
+    setTimeout(() => {
+      feedback.classList.remove("show");
+    }, 2000);
+  } catch (err) {
+    console.error("Failed to copy:", err);
+    alert("Failed to copy to clipboard");
+  }
+}
+
+async function fetchData(command) {
+  const tournamentId = document.getElementById("tournamentId").value.trim();
+  const outputDiv = document.getElementById("output");
+  const buttons = document.querySelectorAll("button");
+
+  if (!tournamentId) {
+    outputDiv.innerHTML =
+      '<div class="error">Please enter a tournament ID</div>';
+    return;
+  }
+
+  // Cancel any pending request
+  if (currentRequest) {
+    currentRequest.abort();
+  }
+
+  // Disable buttons and show loading
+  buttons.forEach((btn) => (btn.disabled = true));
+  outputDiv.innerHTML =
+    '<div class="loading"><div class="spinner"></div>Loading...</div>';
+
+  // Create abort controller for this request
+  const controller = new AbortController();
+  currentRequest = controller;
+
+  try {
+    const response = await fetch(`/api/${command}/${tournamentId}`, {
+      signal: controller.signal,
+    });
+    const data = await response.json();
+
+    if (data.error) {
+      outputDiv.innerHTML = `<div class="error">${data.error}</div>`;
+      originalMessage = "";
+      document.getElementById("copyBtn").disabled = true;
+    } else if (data.message) {
+      // Store the original message for copying
+      originalMessage = data.message;
+
+      // Convert markdown-style links to HTML links
+      const htmlMessage = data.message
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(
+          /\[([^\]]+)\]\(([^)]+)\)/g,
+          '<a href="$2" target="_blank">$1</a>',
+        );
+
+      outputDiv.innerHTML = `<div class="output">${htmlMessage}</div>`;
+      document.getElementById("copyBtn").disabled = false;
+    } else {
+      outputDiv.innerHTML =
+        '<div class="error">Unexpected response format</div>';
+    }
+  } catch (error) {
+    if (error.name === "AbortError") {
+      // Request was cancelled, do nothing
+      return;
+    }
+    outputDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+  } finally {
+    // Re-enable buttons
+    buttons.forEach((btn) => (btn.disabled = false));
+    currentRequest = null;
+  }
+}
+
+// Allow Enter key to trigger the last clicked button or default to participants
+document
+  .getElementById("tournamentId")
+  .addEventListener("keypress", function (event) {
+    if (event.key === "Enter") {
+      fetchData("participants");
+    }
+  });
+
+// Focus on input on page load
+document.getElementById("tournamentId").focus();

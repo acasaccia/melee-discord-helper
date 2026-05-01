@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Melee Discord Helper</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>🎮 Melee Discord Helper</h1>
+      <p class="subtitle">Manage your Magic: The Gathering tournament</p>
+
+      <div class="input-group">
+        <label for="tournamentId">Tournament ID</label>
+        <input
+          type="text"
+          id="tournamentId"
+          placeholder="Enter tournament ID (e.g., 12345)"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="button-group">
+        <button class="btn-participants" onclick="fetchData('participants')">
+          👥 Participants
+        </button>
+        <button class="btn-pairings" onclick="fetchData('pairings')">
+          🎯 Pairings
+        </button>
+        <button class="btn-standings" onclick="fetchData('standings')">
+          🏆 Standings
+        </button>
+      </div>
+
+      <div class="output-header">
+        <span class="output-label">Output</span>
+        <div>
+          <span class="copy-feedback" id="copyFeedback">Copied!</span>
+          <button
+            class="btn-copy"
+            id="copyBtn"
+            onclick="copyToClipboard()"
+            disabled
+          >
+            📋 Copy to Clipboard
+          </button>
+        </div>
+      </div>
+
+      <div class="output-container" id="output">
+        <div class="empty-state">
+          Enter a tournament ID and click a button to generate a message you can
+          post in Discord!
+        </div>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
