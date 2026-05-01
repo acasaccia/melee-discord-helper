@@ -2,13 +2,44 @@ let currentRequest = null;
 let originalMessage = "";
 
 async function copyToClipboard() {
+  const feedback = document.getElementById("copyFeedback");
+  
+  // Try modern clipboard API first (requires HTTPS)
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    try {
+      await navigator.clipboard.writeText(originalMessage);
+      feedback.classList.add("show");
+      setTimeout(() => {
+        feedback.classList.remove("show");
+      }, 2000);
+      return;
+    } catch (err) {
+      console.log("Clipboard API failed, trying fallback:", err);
+    }
+  }
+  
+  // Fallback for HTTP (insecure context)
   try {
-    await navigator.clipboard.writeText(originalMessage);
-    const feedback = document.getElementById("copyFeedback");
-    feedback.classList.add("show");
-    setTimeout(() => {
-      feedback.classList.remove("show");
-    }, 2000);
+    const textArea = document.createElement("textarea");
+    textArea.value = originalMessage;
+    textArea.style.position = "fixed";
+    textArea.style.left = "-999999px";
+    textArea.style.top = "-999999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    const successful = document.execCommand('copy');
+    document.body.removeChild(textArea);
+    
+    if (successful) {
+      feedback.classList.add("show");
+      setTimeout(() => {
+        feedback.classList.remove("show");
+      }, 2000);
+    } else {
+      throw new Error("execCommand failed");
+    }
   } catch (err) {
     console.error("Failed to copy:", err);
     alert("Failed to copy to clipboard");
@@ -54,17 +85,13 @@ async function fetchData(command) {
       // Store the original message for copying
       originalMessage = data.message;
 
-      // Convert markdown-style links to HTML links
-      const htmlMessage = data.message
+      // Display as raw text in a pre tag
+      const escapedMessage = data.message
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(
-          /\[([^\]]+)\]\(([^)]+)\)/g,
-          '<a href="$2" target="_blank">$1</a>',
-        );
+        .replace(/>/g, "&gt;");
 
-      outputDiv.innerHTML = `<div class="output">${htmlMessage}</div>`;
+      outputDiv.innerHTML = `<pre class="output">${escapedMessage}</pre>`;
       document.getElementById("copyBtn").disabled = false;
     } else {
       outputDiv.innerHTML =

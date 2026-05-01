@@ -185,6 +185,11 @@ button:disabled {
   color: #333;
 }
 
+pre.output {
+  margin: 0;
+  font-family: "Courier New", monospace;
+}
+
 .output a {
   color: #667eea;
   text-decoration: none;
