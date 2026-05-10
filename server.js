@@ -12,6 +12,8 @@ const {
   getParticipantInfo,
 } = require("./utils/api");
 
+const { splitMessage } = require("./utils/messageFormatter");
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -261,6 +263,9 @@ async function formatStandings(tournamentId) {
 app.get("/api/participants/:tournamentId", async (req, res) => {
   try {
     const result = await formatParticipants(req.params.tournamentId);
+    if (result.message) {
+      result.messageParts = splitMessage(result.message);
+    }
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -270,6 +275,9 @@ app.get("/api/participants/:tournamentId", async (req, res) => {
 app.get("/api/pairings/:tournamentId", async (req, res) => {
   try {
     const result = await formatPairings(req.params.tournamentId);
+    if (result.message) {
+      result.messageParts = splitMessage(result.message);
+    }
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -279,6 +287,9 @@ app.get("/api/pairings/:tournamentId", async (req, res) => {
 app.get("/api/standings/:tournamentId", async (req, res) => {
   try {
     const result = await formatStandings(req.params.tournamentId);
+    if (result.message) {
+      result.messageParts = splitMessage(result.message);
+    }
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -286,9 +297,9 @@ app.get("/api/standings/:tournamentId", async (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(
-    `Melee Discord Helper Web Interface running at http://localhost:${PORT}`,
+    `Melee Discord Helper Web Interface running at http://0.0.0.0:${PORT}`,
   );
   console.log(
     `Make sure CLIENT_ID and CLIENT_SECRET are set in your .env file`,

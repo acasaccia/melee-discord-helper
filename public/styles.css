@@ -141,16 +141,71 @@ button:disabled {
   font-size: 14px;
 }
 
+.message-part {
+  margin-bottom: 20px;
+}
+
+.message-part:last-child {
+  margin-bottom: 0;
+}
+
+.part-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.part-label {
+  font-weight: 600;
+  color: #555;
+  font-size: 14px;
+}
+
+.btn-copy-part {
+  background: #4caf50;
+  padding: 6px 12px;
+  font-size: 13px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.btn-copy-part:hover:not(:disabled) {
+  background: #43a047;
+}
+
 .copy-feedback {
   font-size: 12px;
   color: #4caf50;
-  margin-left: 10px;
+  margin-right: 10px;
   opacity: 0;
   transition: opacity 0.3s;
 }
 
 .copy-feedback.show {
   opacity: 1;
+}
+
+.output-textarea {
+  width: 100%;
+  min-height: 150px;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 12px;
+  font-family: "Courier New", monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  resize: vertical;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.output-textarea:focus {
+  outline: none;
+  border-color: #667eea;
 }
 
 .output-container {

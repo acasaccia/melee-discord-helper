@@ -1,13 +1,14 @@
 let currentRequest = null;
-let originalMessage = "";
+let messageParts = [];
 
-async function copyToClipboard() {
-  const feedback = document.getElementById("copyFeedback");
-  
+async function copyToClipboard(partIndex) {
+  const text = messageParts[partIndex];
+  const feedback = document.getElementById(`copyFeedback-${partIndex}`);
+
   // Try modern clipboard API first (requires HTTPS)
   if (navigator.clipboard && navigator.clipboard.writeText) {
     try {
-      await navigator.clipboard.writeText(originalMessage);
+      await navigator.clipboard.writeText(text);
       feedback.classList.add("show");
       setTimeout(() => {
         feedback.classList.remove("show");
@@ -17,21 +18,21 @@ async function copyToClipboard() {
       console.log("Clipboard API failed, trying fallback:", err);
     }
   }
-  
+
   // Fallback for HTTP (insecure context)
   try {
     const textArea = document.createElement("textarea");
-    textArea.value = originalMessage;
+    textArea.value = text;
     textArea.style.position = "fixed";
     textArea.style.left = "-999999px";
     textArea.style.top = "-999999px";
     document.body.appendChild(textArea);
     textArea.focus();
     textArea.select();
-    
-    const successful = document.execCommand('copy');
+
+    const successful = document.execCommand("copy");
     document.body.removeChild(textArea);
-    
+
     if (successful) {
       feedback.classList.add("show");
       setTimeout(() => {
@@ -79,20 +80,36 @@ async function fetchData(command) {
 
     if (data.error) {
       outputDiv.innerHTML = `<div class="error">${data.error}</div>`;
-      originalMessage = "";
-      document.getElementById("copyBtn").disabled = true;
-    } else if (data.message) {
-      // Store the original message for copying
-      originalMessage = data.message;
+      messageParts = [];
+    } else if (data.messageParts && data.messageParts.length > 0) {
+      // Store the message parts
+      messageParts = data.messageParts;
 
-      // Display as raw text in a pre tag
-      const escapedMessage = data.message
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+      // Build HTML for multiple parts
+      let html = "";
+      messageParts.forEach((part, index) => {
+        const escapedMessage = part
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
 
-      outputDiv.innerHTML = `<pre class="output">${escapedMessage}</pre>`;
-      document.getElementById("copyBtn").disabled = false;
+        html += `
+          <div class="message-part">
+            <div class="part-header">
+              <span class="part-label">Part ${index + 1}</span>
+              <div>
+                <span class="copy-feedback" id="copyFeedback-${index}">Copied!</span>
+                <button class="btn-copy-part" onclick="copyToClipboard(${index})">
+                  📋 Copy Part ${index + 1}
+                </button>
+              </div>
+            </div>
+            <textarea class="output-textarea" readonly>${escapedMessage}</textarea>
+          </div>
+        `;
+      });
+
+      outputDiv.innerHTML = html;
     } else {
       outputDiv.innerHTML =
         '<div class="error">Unexpected response format</div>';
